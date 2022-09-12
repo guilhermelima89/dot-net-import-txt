@@ -69,6 +69,7 @@ public class ArquivoService : IArquivoService
 
         var layoutArquivo = Processar(_arquivo.ArquivoOriginal, Codigo);
 
+
         // transformar de bytes em string
 
         // validar header
@@ -97,36 +98,49 @@ public class ArquivoService : IArquivoService
         switch (versaoLayout)
         {
             case "0001":
-                return ConverterArquivo(arquivo);
+                return ConverterArquivo(arquivoOriginal);
             default:
                 throw new ArgumentException("versão do layout arquivo não encontrada");
         }
     }
 
-    private static object ConverterArquivo(string[] arquivo)
+    private static object ConverterArquivo(byte[] arquivo)
     {
-        return ImportFile<ConfirmacaoCadastral>("persons.txt", ';');
+        var confirmacaoCadastral = new ConfirmacaoCadastralHeader();
+
+        var arquivoDescompactado = Compactador.TryDescompactar(arquivo);
+
+        var header = ImportFile<ConfirmacaoCadastralHeader>(arquivoDescompactado, ';', true);
+        var operacoes = ImportFile<ConfirmacaoCadastralOperacao>(arquivoDescompactado, ';', false);
+
+        confirmacaoCadastral.Versao = header[0].Versao;
+        confirmacaoCadastral.Tipo = header[0].Tipo;
+        confirmacaoCadastral.ConfirmacaoCadastral = operacoes;
+
+        return confirmacaoCadastral;
     }
 
-    private static List<T> ImportFile<T>(string FileName, char ColumnSeperator) where T : new()
+    private static List<T> ImportFile<T>(byte[] arquivo, char ColumnSeperator, bool header) where T : new()
     {
         var list = new List<T>();
-        using (var str = File.OpenText(FileName))
+
+        using (var str = new StreamReader(new MemoryStream(arquivo)))
         {
-            int Line = 1;
+            int Line = header ? 0 : 1;
             int Column = 0;
+
             try
             {
-                var columnsHeader = str.ReadLine().Split(ColumnSeperator);
                 var t = typeof(T);
-                var plist = new Dictionary<int,
-                    PropertyInfo>();
+                var columnsHeader = t.GetProperties();
+                var plist = new Dictionary<int, PropertyInfo>();
                 for (int i = 0; i < columnsHeader.Length; i++)
                 {
-                    var p = t.GetProperty(columnsHeader[i]);
+                    var p = columnsHeader[i];
                     if (p != null && p.CanWrite && p.GetIndexParameters().Length == 0) plist.Add(i, p);
                 }
                 string s;
+
                 while ((s = str.ReadLine()) != null)
                 {
                     Line++;
@@ -138,8 +152,12 @@ public class ArquivoService : IArquivoService
                         if (p.Value.PropertyType == typeof(int)) p.Value.SetValue(obj, int.Parse(data[Column]), null);
                         else if (p.Value.PropertyType == typeof(string)) p.Value.SetValue(obj, data[Column], null);
                     }
+
                     list.Add(obj);
+
+                    if (header) return list;
                 }
+
                 return list;
             }
             catch (Exception ex)
@@ -148,6 +166,7 @@ public class ArquivoService : IArquivoService
             }
         }
     }
+
 
     private ArquivoStatusProcessamento CriarStatusProcessamento(Arquivo arquivo)
     {
