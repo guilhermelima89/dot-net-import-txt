@@ -10,7 +10,11 @@ namespace Api.Mappings
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Identificador)
+            builder.Property(x => x.NumeroLinhaArquivoOriginal)
+              .IsRequired()
+              .HasColumnType("int");
+
+            builder.Property(x => x.TextoLinhaArquivoOriginal)
                 .IsRequired()
                 .HasColumnType("varchar(250)");
 
@@ -29,6 +33,8 @@ namespace Api.Mappings
             builder.Property(x => x.Confirmacao)
                 .IsRequired()
                 .HasColumnType("varchar(250)");
+
+            builder.HasOne(x => x.Arquivo);
 
             /* ENTITY */
             builder.Property(x => x.DataCadastro)

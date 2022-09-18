@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Api.Mappings
 {
-    public class ArquivoComErroValidacaoMapping : IEntityTypeConfiguration<ArquivoComErroValidacao>
+    public class ArquivoErroMapping : IEntityTypeConfiguration<ArquivoErro>
     {
-        public void Configure(EntityTypeBuilder<ArquivoComErroValidacao> builder)
+        public void Configure(EntityTypeBuilder<ArquivoErro> builder)
         {
             builder.HasKey(x => x.Id);
 
@@ -22,6 +22,12 @@ namespace Api.Mappings
                 .IsRequired()
                 .HasColumnType("varchar(250)");
 
+            builder.Property(x => x.DataProcessamento)
+                .IsRequired()
+                .HasColumnType("datetime");
+
+            builder.HasOne(x => x.Arquivo);
+
             /* ENTITY */
             builder.Property(x => x.DataCadastro)
                 .HasColumnType("datetime");
@@ -29,7 +35,7 @@ namespace Api.Mappings
             builder.Property(x => x.DataAlteracao)
                 .HasColumnType("datetime");
 
-            builder.ToTable("ArquivoComErroValidacao");
+            builder.ToTable("ArquivoErro");
         }
     }
 }

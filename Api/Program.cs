@@ -13,9 +13,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<ApplicationDbContext>();
 
-builder.Services.AddScoped<IArquivoRepository, ArquivoRepository>();
 builder.Services.AddScoped<IArquivoService, ArquivoService>();
 
+builder.Services.AddScoped<IArquivoRepository, ArquivoRepository>();
+builder.Services.AddScoped<IArquivoErroRepository, ArquivoErroRepository>();
 builder.Services.AddScoped<IArquivoStatusProcessamentoRepository, ArquivoStatusProcessamentoRepository>();
 
 builder.Services.AddCors(options =>

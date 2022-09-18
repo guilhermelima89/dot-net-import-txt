@@ -14,6 +14,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ArquivoComErroValidacao> ArquivoComErroValidacao { get; set; }
     public DbSet<ArquivoStatus> ArquivoStatus { get; set; }
     public DbSet<ArquivoStatusProcessamento> ArquivoStatusProcessamento { get; set; }
+    public DbSet<ArquivoErro> ArquivoErro { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
